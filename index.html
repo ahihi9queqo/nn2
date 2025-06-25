@@ -1,34 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>ESP32 LED Status</title>
   <style>
-    body { font-family: sans-serif; text-align: center; margin-top: 50px; }
-    .status { font-size: 2em; margin: 20px; }
-    .led-on { color: green; }
-    .led-off { color: red; }
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+    .led-status { font-size: 48px; margin-top: 20px; }
+    .on { color: green; }
+    .off { color: red; }
   </style>
 </head>
 <body>
   <h1>ESP32 LED Status</h1>
-  <div id="status" class="status">Loading...</div>
+  <div id="status" class="led-status off">Loading...</div>
 
   <script>
-    const statusEl = document.getElementById("status");
-    async function fetchStatus() {
+    const statusDiv = document.getElementById('status');
+    const apiUrl = 'https://nn-g7tj.onrender.com/api/led';
+
+    async function fetchLedStatus() {
       try {
-        const res = await fetch("https://esp32-led-api.onrender.com/api/led");
-        const data = await res.json();
-        statusEl.textContent = data.status === "on" ? "LED ON" : "LED OFF";
-        statusEl.className = `status led-${data.status}`;
-      } catch (e) {
-        statusEl.textContent = "Error fetching status";
-        statusEl.className = "status";
+        const response = await fetch(apiUrl);
+        if (!response.ok) throw new Error('Network error');
+        const data = await response.json();
+
+        statusDiv.textContent = data.status === 'on' ? 'LED is ON' : 'LED is OFF';
+        statusDiv.className = 'led-status ' + (data.status === 'on' ? 'on' : 'off');
+      } catch (error) {
+        statusDiv.textContent = 'Error loading status';
+        statusDiv.className = 'led-status off';
+        console.error(error);
       }
     }
-    fetchStatus();
-    setInterval(fetchStatus, 5000); // cập nhật mỗi 5 giây
+
+    fetchLedStatus();
+    setInterval(fetchLedStatus, 5000); // Cập nhật mỗi 5 giây
   </script>
 </body>
 </html>
